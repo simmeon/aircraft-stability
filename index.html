@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Aircraft Stability</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <script type="module" src="/main.js"></script>
+
+  <div class="container">
+
+    <!-- Left Panel: Visualiser and Controls -->
+    <div class="left-panel">
+      <div class="visualiser-section">
+        <canvas id="aircraftCanvas" width="1000" height="600"></canvas>
+        <div class="controls">
+          <button id="playButton">Pause</button>
+          <button id="resetButton">Reset Sim</button>
+          <button id="perturbButton">Deflect Elevator</button>
+        </div>
+      </div>
+
+      <div class="info-panels row">
+        <div id="steadyStateInfo" class="panel half">
+          <h3>Steady State Condition</h3>
+          <ul>
+            <li>Altitude: <span id="altitude"></span> m</li>
+            <li>True Airspeed (TAS₁): <span id="TAS"></span> m/s</li>
+            <li>Angle of Attack (α₁): <span id="alpha"></span> °</li>
+            <li>Lift Coefficient (C<sub>L1</sub>): <span id="CL"></span></li>
+            <li>Drag Coefficient (C<sub>D1</sub>): <span id="CD"></span></li>
+            <li>Pitch Angle (θ₁): <span id="theta"></span> °</li>
+            <li>Elevator Deflection (δₑ₁): <span id="de"></span> °</li>
+          </ul>
+        </div>
+
+        <div id="coeffControls" class="panel half">
+          <h3>Stability Derivatives</h3>
+          <label>CDₐ: <input type="range" id="CD_a" min="-0.5" max="0.5" step="0.01" value="0.121"><span id="CD_a_val"></span></label>
+          <label>CLₐ: <input type="range" id="CL_a" min="0" max="10" step="0.1" value="4.41"><span id="CL_a_val"></span></label>
+          <label>CL_q: <input type="range" id="CL_q" min="0" max="10" step="0.1" value="3.9"><span id="CL_q_val"></span></label>
+          <label>Cmₐ: <input type="range" id="Cm_a" min="-2" max="0" step="0.01" value="-0.613"><span id="Cm_a_val"></span></label>
+          <label>Cmₐ̇: <input type="range" id="Cm_adot" min="-10" max="0" step="0.1" value="-7.27"><span id="Cm_adot_val"></span></label>
+          <label>Cm_q: <input type="range" id="Cm_q" min="-20" max="0" step="0.1" value="-12.4"><span id="Cm_q_val"></span></label>
+          <button id="resetCoeffsButton">Reset Stability Derivatives</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Charts -->
+    <div class="right-panel">
+      <div class="chart-section">
+        <div id="stateTabs">
+          <button class="tab-button active" data-index="0">Δu</button>
+          <button class="tab-button" data-index="1">Δα</button>
+          <button class="tab-button" data-index="2">Δq</button>
+          <button class="tab-button" data-index="3">Δθ</button>
+        </div>
+        <canvas id="stateChart" width="800" height="400"></canvas>
+      </div>
+      <div class="chart-section">
+        <canvas id="poleChart" width="800" height="400"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

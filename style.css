@@ -1,0 +1,108 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f5f5f5;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* === Left Panel === */
+.left-panel {
+  flex: 1;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.visualiser-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.controls {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+#aircraftCanvas {
+  border: 1px solid #ccc;
+  background: white;
+}
+
+/* === Right Panel === */
+.right-panel {
+  flex: 1;
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-section {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#poleChart {
+  margin-top: 10px;
+}
+
+#stateTabs {
+  margin-bottom: 10px;
+}
+
+.tab-button {
+  margin-right: 5px;
+  padding: 5px 10px;
+  background: #eee;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.tab-button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* === Info Panels (Bottom Left) === */
+.info-panels.row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.panel {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  flex: 1;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.panel.half {
+  width: 50%;
+}
+
+#coeffControls label {
+  display: block;
+  margin-bottom: 6px;
+}
