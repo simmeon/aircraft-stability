@@ -21,7 +21,7 @@ const aircraftCtx = aircraftCanvas.getContext("2d");
 
 // === Assests ===
 const aircraftImg = new Image();
-aircraftImg.src = "/img/aircraft.png";
+aircraftImg.src = "aircraft.png";
 
 // Clone defaults so we can modify them
 const coeffs = { ...defaultCoeffs };
