@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <title>Aircraft Stability</title>
   <link rel="stylesheet" href="style.css">
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
 </head>
 <body>
 
@@ -14,10 +17,10 @@
     <!-- Left Panel: Visualiser and Controls -->
     <div class="left-panel">
       <div class="visualiser-section">
-        <canvas id="aircraftCanvas" width="1000" height="600"></canvas>
+        <canvas id="aircraftCanvas"></canvas>
         <div class="controls">
-          <button id="playButton">Pause</button>
           <button id="resetButton">Reset Sim</button>
+          <button id="playButton"><img id="playPauseIcon" src="pause.png" alt="Pause" /></button>
           <button id="perturbButton">Deflect Elevator</button>
         </div>
       </div>
@@ -27,41 +30,74 @@
           <h3>Steady State Condition</h3>
           <ul>
             <li>Altitude: <span id="altitude"></span> m</li>
-            <li>True Airspeed (TAS₁): <span id="TAS"></span> m/s</li>
-            <li>Angle of Attack (α₁): <span id="alpha"></span> °</li>
-            <li>Lift Coefficient (C<sub>L1</sub>): <span id="CL"></span></li>
-            <li>Drag Coefficient (C<sub>D1</sub>): <span id="CD"></span></li>
-            <li>Pitch Angle (θ₁): <span id="theta"></span> °</li>
-            <li>Elevator Deflection (δₑ₁): <span id="de"></span> °</li>
+            <li>True Airspeed (\( \text{TAS}_{1} \)): <span id="TAS"></span> m/s</li>
+            <li>Angle of Attack (\( \alpha_1 \)): <span id="alpha"></span> °</li>
+            <li>Lift Coefficient (\( C_{L_{1}} \)): <span id="CL"></span></li>
+            <li>Drag Coefficient (\( C_{D_{1}} \)): <span id="CD"></span></li>
+            <li>Pitch Angle (\( \theta_{1} \)): <span id="theta"></span> °</li>
+            <li>Elevator Deflection (\( \delta_{e_{1}} \)): <span id="de"></span> °</li>
           </ul>
         </div>
 
         <div id="coeffControls" class="panel half">
-          <h3>Stability Derivatives</h3>
-          <label>CDₐ: <input type="range" id="CD_a" min="-0.5" max="0.5" step="0.01" value="0.121"><span id="CD_a_val"></span></label>
-          <label>CLₐ: <input type="range" id="CL_a" min="0" max="10" step="0.1" value="4.41"><span id="CL_a_val"></span></label>
-          <label>CL_q: <input type="range" id="CL_q" min="0" max="10" step="0.1" value="3.9"><span id="CL_q_val"></span></label>
-          <label>Cmₐ: <input type="range" id="Cm_a" min="-2" max="0" step="0.01" value="-0.613"><span id="Cm_a_val"></span></label>
-          <label>Cmₐ̇: <input type="range" id="Cm_adot" min="-10" max="0" step="0.1" value="-7.27"><span id="Cm_adot_val"></span></label>
-          <label>Cm_q: <input type="range" id="Cm_q" min="-20" max="0" step="0.1" value="-12.4"><span id="Cm_q_val"></span></label>
-          <button id="resetCoeffsButton">Reset Stability Derivatives</button>
+          <div class="coeff-header">
+            <h3>Stability Derivatives</h3>
+            <button id="resetCoeffsButton">Reset defaults</button>
+          </div>
+
+          <div class="slider-row">
+            <label for="CD_a">\(C_{D_{\alpha}}\):</label>
+            <input type="range" id="CD_a" min="-0.5" max="0.5" step="0.01" value="0.121">
+            <span id="CD_a_val">0.121</span>
+          </div>
+
+          <div class="slider-row">
+            <label for="CL_a">\(C_{L_{\alpha}}\):</label>
+            <input type="range" id="CL_a" min="0" max="10" step="0.1" value="4.41">
+            <span id="CL_a_val">4.41</span>
+          </div>
+
+          <div class="slider-row">
+            <label for="CL_q">\(C_{L_{q}}\):</label>
+            <input type="range" id="CL_q" min="0" max="10" step="0.1" value="3.9">
+            <span id="CL_q_val">3.9</span>
+          </div>
+
+          <div class="slider-row">
+            <label for="Cm_a">\(C_{m_{\alpha}}\):</label>
+            <input type="range" id="Cm_a" min="-2" max="0" step="0.01" value="-0.613">
+            <span id="Cm_a_val">-0.613</span>
+          </div>
+
+          <div class="slider-row">
+            <label for="Cm_adot">\(C_{m_{\dot{\alpha}}}\):</label>
+            <input type="range" id="Cm_adot" min="-10" max="0" step="0.1" value="-7.27">
+            <span id="Cm_adot_val">-7.27</span>
+          </div>
+
+          <div class="slider-row">
+            <label for="Cm_q">\(C_{m_{q}}\):</label>
+            <input type="range" id="Cm_q" min="-20" max="0" step="0.1" value="-12.4">
+            <span id="Cm_q_val">-12.4</span>
+          </div>
         </div>
+
       </div>
     </div>
 
     <!-- Right Panel: Charts -->
     <div class="right-panel">
-      <div class="chart-section">
+      <div class="chart-section chart-container" id="stateChartContainer">
         <div id="stateTabs">
-          <button class="tab-button active" data-index="0">Δu</button>
-          <button class="tab-button" data-index="1">Δα</button>
-          <button class="tab-button" data-index="2">Δq</button>
-          <button class="tab-button" data-index="3">Δθ</button>
+          <button class="tab-button active" data-index="0">\( u_{\Delta} \)</button>
+          <button class="tab-button" data-index="1">\( \alpha_{\Delta} \)</button>
+          <button class="tab-button" data-index="2">\( q_{\Delta} \)</button>
+          <button class="tab-button" data-index="3">\( \theta_{\Delta} \)</button>
         </div>
-        <canvas id="stateChart" width="800" height="400"></canvas>
+        <canvas id="stateChart"></canvas>
       </div>
-      <div class="chart-section">
-        <canvas id="poleChart" width="800" height="400"></canvas>
+      <div class="chart-section chart-container" id="poleChartContainer">
+        <canvas id="poleChart"></canvas>
       </div>
     </div>
 

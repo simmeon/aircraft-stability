@@ -18,10 +18,15 @@ const perturbButton = document.getElementById("perturbButton");
 const resetCoeffsButton = document.getElementById("resetCoeffsButton");
 const aircraftCanvas = document.getElementById("aircraftCanvas");
 const aircraftCtx = aircraftCanvas.getContext("2d");
+const playIcon = document.getElementById('playPauseIcon');
 
 // === Assests ===
 const aircraftImg = new Image();
 aircraftImg.src = "aircraft.png";
+const playImg = new Image();
+playImg.src = "play.png";
+const pauseImg = new Image();
+pauseImg.src = "pause.png";
 
 // Clone defaults so we can modify them
 const coeffs = { ...defaultCoeffs };
@@ -52,9 +57,11 @@ const chart = new Chart(ctx, {
     datasets: [{
       label: 'Δu (m/s)',
       data: [],
-      borderColor: 'blue',
-      borderWidth: 1,
-      pointRadius: 0
+      backgroundColor: 'black',
+      borderColor: 'black',
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.2
     }]
   },
   options: {
@@ -62,20 +69,23 @@ const chart = new Chart(ctx, {
       x: {
         type: 'linear',
         title: { display: true, text: 'Time (s)' },
-        ticks: { stepSize: 1 }
+        ticks: { stepSize: 1, maxTicksLimit: 10 }
       },
       y: {
         type: 'linear',
-        title: { display: true, text: 'Δu (m/s)' },
+        title: { display: false,},
         ticks: { maxTicksLimit: 5 },
         grid: {
-          color: (ctx) => ctx.tick.value === 0 ? 'black' : 'rgba(0,0,0,0.1)',
+          color: (ctx) => ctx.tick.value === 0 ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)',
           lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 1
         }
       }
     },
+    plugins: {
+      legend: { display: false }
+    },
     maintainAspectRatio: false,
-    responsive: false,
+    responsive: true,
     animation: false
   }
 });
@@ -99,7 +109,7 @@ const poleChart = new Chart(poleCtx, {
   },
   options: {
     animation: false,
-    responsive: false,
+    responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: {
@@ -183,16 +193,13 @@ function updateChart() {
   chart.options.scales.y.min = -maxAbs * 1.1;
   chart.options.scales.y.max = maxAbs * 1.1;
 
-  const labels = ["Δu (m/s)", "Δα (deg)", "Δq (deg/s)", "Δθ (deg)"];
-  chart.data.datasets[0].label = labels[activeStateIndex];
-  chart.options.scales.y.title.text = labels[activeStateIndex];
   chart.update();
 }
 
 // === Visualisation Config ===
-const aircraftImgWidth = aircraftCanvas.width * 0.5;
-const aircraftImgHeight = (2 / 3) * aircraftImgWidth;
-const metersToPixels = aircraftImgWidth / 8.5344; // 28 ft in meters
+let aircraftImgWidth = aircraftCanvas.width * 0.5;
+let aircraftImgHeight = (2 / 3) * aircraftImgWidth;
+let metersToPixels = aircraftImgWidth / 8.5344; // 28 ft in meters
 
 // === Streamline Particles ===
 const streamlineParticles = Array.from({ length: numStreamlines }, () => ({
@@ -290,12 +297,12 @@ function drawArrow(ctx, x1, y1, x2, y2, color = 'black') {
   ctx.save();
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 2;
 
   const dx = x2 - x1;
   const dy = y2 - y1;
   const len = Math.hypot(dx, dy);
-  const headlen = 5;
+  const headlen = 10;
   const angle = Math.atan2(dy, dx);
 
   ctx.beginPath();
@@ -347,7 +354,7 @@ function updatePoles() {
   poleChart.options.scales.x.max = realMax;
   poleChart.options.scales.y.min = -imagMax;
   poleChart.options.scales.y.max = imagMax;
-  poleChart.update('none');
+  poleChart.update();
 }
 
 const coeffInputs = ["CD_a", "CL_a", "CL_q", "Cm_a", "Cm_adot", "Cm_q"];
@@ -383,7 +390,8 @@ resetCoeffsButton.onclick = () => {
 
 function handlePlayButtonPress() {
   isRunning = !isRunning;
-  playButton.textContent = isRunning ? "Pause" : "Play";
+  playIcon.src = isRunning ? pauseImg.src : playImg.src;
+  playIcon.alt = isRunning ? 'Pause' : 'Play';
   if (isRunning) {
     lastUpdateTime = performance.now();
     lastChartUpdate = performance.now();
@@ -434,6 +442,49 @@ function updateSteadyStateInfo() {
   document.getElementById('theta').textContent = (steadyState1.theta * RAD2DEG).toFixed(2);
   document.getElementById('de').textContent = (steadyState1.de * RAD2DEG).toFixed(2);
 }
+
+function resizeCanvasToDisplaySize(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const scale = window.devicePixelRatio || 1;
+
+  canvas.width = rect.width * scale;
+  canvas.height = rect.height * scale;
+
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(scale, 0, 0, scale, 0, 0); // Scale drawing operations
+}
+
+function resizeCanvases() {
+  resizeCanvasToDisplaySize(document.getElementById('aircraftCanvas'));
+  aircraftImgWidth = aircraftCanvas.width * 0.5;
+  aircraftImgHeight = (2 / 3) * aircraftImgWidth;
+  metersToPixels = aircraftImgWidth / 8.5344; // 28 ft in meters
+  drawAircraft();
+
+  resizeCanvasToDisplaySize(document.getElementById('stateChart'));
+  resizeCanvasToDisplaySize(document.getElementById('poleChart'));
+
+  requestAnimationFrame(() => {
+    chart.update();
+    poleChart.update();
+  });
+}
+
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  resizeCanvases();
+  // Clear any previous timer
+  clearTimeout(resizeTimeout);
+
+  // Set a new timer to run 1 second after resizing stops
+  resizeTimeout = setTimeout(() => {
+    poleChart.update();
+  }, 1000);
+});
+
+// On DOM loaded — immediately resize all canvases:
+document.addEventListener("DOMContentLoaded", resizeCanvases());
+
 
 updateSteadyStateInfo();
 updatePoles();
