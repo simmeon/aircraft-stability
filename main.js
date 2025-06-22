@@ -228,11 +228,11 @@ function drawAircraft() {
     z: -Math.sin(theta),
   };
 
-  const centerX = aircraftCanvas.width / 2;
-  const centerY = aircraftCanvas.height / 2;
+  const centerX = aircraftCanvas.getBoundingClientRect().width / 2;
+  const centerY = aircraftCanvas.getBoundingClientRect().height / 2;
   const vectorLength = 200;
 
-  console.log(window.innerWidth, aircraftCanvas.width);
+  console.log(window.innerWidth, aircraftCanvas.centerX * 2);
 
   // === Draw Scene ===
   drawStreamlines(ctx, windVector, metersToPixels);
