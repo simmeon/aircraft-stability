@@ -413,13 +413,24 @@ function handleResetButtonPress() {
   }
 }
 
-function deflectElevator() { de = - 2 * DEG2RAD; }
-function resetElevator() { de = 0; }
+function deflectElevator(e) {
+  e.preventDefault(); 
+  de = - 2 * DEG2RAD; 
+}
+function resetElevator(e) { 
+  e.preventDefault();
+  de = 0; 
+}
 
 playButton.onclick = handlePlayButtonPress;
 resetButton.onclick = handleResetButtonPress;
 perturbButton.onmousedown = deflectElevator;
 perturbButton.onmouseup = resetElevator;
+
+perturbButton.ontouchstart = deflectElevator;
+perturbButton.ontouchend = resetElevator;
+perturbButton.ontouchcancel = resetElevator;
+
 
 const tabButtons = document.querySelectorAll(".tab-button");
 tabButtons.forEach(button => {
