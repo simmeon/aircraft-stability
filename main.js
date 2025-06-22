@@ -499,7 +499,7 @@ window.addEventListener('resize', () => {
   }, 1000);
 });
 
-// On DOM loaded — immediately resize all canvases:
+// On loaded — immediately resize all canvases:
 document.addEventListener("load", resizeCanvases());
 
 
