@@ -55,7 +55,6 @@ const chart = new Chart(ctx, {
   data: {
     labels: [],
     datasets: [{
-      label: 'Δu (m/s)',
       data: [],
       backgroundColor: 'black',
       borderColor: 'black',
@@ -192,6 +191,10 @@ function updateChart() {
   const maxAbs = Math.max(...padded.map(Math.abs), 0.1);
   chart.options.scales.y.min = -maxAbs * 1.1;
   chart.options.scales.y.max = maxAbs * 1.1;
+
+  // Update label based on selected state
+  const stateLabels = ['Δu (m/s)', 'Δα (deg)', 'Δq (deg/s)', 'Δθ (deg)'];
+  chart.data.datasets[0].label = stateLabels[activeStateIndex];
 
   chart.update();
 }
