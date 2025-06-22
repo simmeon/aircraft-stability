@@ -460,13 +460,13 @@ function resizeCanvasToDisplaySize(canvas) {
 }
 
 function resizeCanvases() {
-  const aircraftRect = resizeCanvasToDisplaySize(document.getElementById('aircraftCanvas'));
+  const aircraftRect = resizeCanvasToDisplaySize(aircraftCanvas);
   
   // Use CSS pixels, not canvas.width
   aircraftImgWidth = aircraftRect.width * 0.5;
   aircraftImgHeight = (2 / 3) * aircraftImgWidth;
   metersToPixels = aircraftImgWidth / 8.5344; // 28 ft in meters
-  
+
   drawAircraft();
 
   resizeCanvasToDisplaySize(document.getElementById('stateChart'));
@@ -491,7 +491,7 @@ window.addEventListener('resize', () => {
 });
 
 // On DOM loaded — immediately resize all canvases:
-document.addEventListener("DOMContentLoaded", resizeCanvases());
+document.addEventListener("load", resizeCanvases());
 
 
 updateSteadyStateInfo();
