@@ -197,20 +197,20 @@ function updateChart() {
 }
 
 // === Visualisation Config ===
-let aircraftImgWidth = aircraftCanvas.width * 0.5;
+let aircraftImgWidth = aircraftCanvas.getBoundingClientRect().width * 0.5;
 let aircraftImgHeight = (2 / 3) * aircraftImgWidth;
 let metersToPixels = aircraftImgWidth / 8.5344; // 28 ft in meters
 
 // === Streamline Particles ===
 const streamlineParticles = Array.from({ length: numStreamlines }, () => ({
-  x: Math.random() * aircraftCanvas.width * 2,
-  y: Math.random() * aircraftCanvas.height,
+  x: Math.random() * aircraftCanvas.getBoundingClientRect().width * 2,
+  y: Math.random() * aircraftCanvas.getBoundingClientRect().height,
 }));
 
 // === Main Drawing Function ===
 function drawAircraft() {
   const ctx = aircraftCtx;
-  ctx.clearRect(0, 0, aircraftCanvas.width, aircraftCanvas.height);
+  ctx.clearRect(0, 0, aircraftCanvas.getBoundingClientRect().width, aircraftCanvas.getBoundingClientRect().height);
 
   // === Aircraft State ===
   const [u, alpha, , theta] = x;
@@ -266,8 +266,8 @@ function drawStreamlines(ctx, windVec, scale) {
     p.y += wind_vy * dt;
 
     if (p.x < -50) {
-      p.x = aircraftCanvas.width + Math.random() * 300;
-      p.y = (Math.random() * 2 - 1) * aircraftCanvas.height * 2;
+      p.x = aircraftCanvas.getBoundingClientRect().width + Math.random() * 300;
+      p.y = (Math.random() * 2 - 1) * aircraftCanvas.getBoundingClientRect().height * 2;
     }
 
     ctx.beginPath();
@@ -336,8 +336,6 @@ function scaleVector(vec, scale) {
 function magnitude(vec) {
   return Math.sqrt(vec.x ** 2 + vec.z ** 2);
 }
-
-
 
 
 function updatePoles() {
