@@ -444,21 +444,29 @@ function updateSteadyStateInfo() {
 }
 
 function resizeCanvasToDisplaySize(canvas) {
-  const rect = canvas.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect(); // ← CSS pixel size
   const scale = window.devicePixelRatio || 1;
 
+  // Set internal resolution
   canvas.width = rect.width * scale;
   canvas.height = rect.height * scale;
 
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(scale, 0, 0, scale, 0, 0); // Scale drawing operations
+  // Scale the context so drawing works in CSS pixels
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+  // 👇 Return rect for layout-based calculations
+  return rect;
 }
 
 function resizeCanvases() {
-  resizeCanvasToDisplaySize(document.getElementById('aircraftCanvas'));
-  aircraftImgWidth = aircraftCanvas.width * 0.5;
+  const aircraftRect = resizeCanvasToDisplaySize(document.getElementById('aircraftCanvas'));
+  
+  // Use CSS pixels, not canvas.width
+  aircraftImgWidth = aircraftRect.width * 0.5;
   aircraftImgHeight = (2 / 3) * aircraftImgWidth;
   metersToPixels = aircraftImgWidth / 8.5344; // 28 ft in meters
+  
   drawAircraft();
 
   resizeCanvasToDisplaySize(document.getElementById('stateChart'));
