@@ -33,6 +33,39 @@ body {
   max-height: 60vh;
 }
 
+.vector-toggle-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 20;
+  border: 1px solid #999;
+}
+
+.vector-toggle-overlay label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  font-family: inherit;
+  user-select: none;
+}
+
+.vector-toggle-overlay input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #444;
+  cursor: pointer;
+}
+
 .controls {
   position: absolute;
   bottom: 10px;
@@ -370,4 +403,80 @@ button:disabled {
   height: 40px;
   object-fit: contain;
   display: block;
+}
+
+.value-box {
+  width: 60px;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 4px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  text-align: right;
+}
+
+/* Chrome, Safari, Edge, Opera */
+.value-box::-webkit-outer-spin-button,
+.value-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.value-box[type="number"] {
+  appearance: none;
+  -moz-appearance: textfield;
+}
+
+#steadyStateInfo ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: 1rem;       /* smaller font size */
+  line-height: 1.4;
+  font-family: 'Courier New', monospace;
+  color: #222;
+}
+
+#steadyStateInfo ul li {
+  display: flex;
+  align-items: center;    /* vertically center all content */
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid #eee;
+}
+
+#steadyStateInfo ul li span,
+#steadyStateInfo ul li .MathJax {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+#steadyStateInfo ul li:last-child {
+  border-bottom: none;
+}
+
+#steadyStateInfo ul li span {
+  font-weight: 700;
+  /* remove fixed width, so it doesn’t look off */
+  color: #000;
+  white-space: nowrap;
+}
+
+.steady-state-select-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.steady-state-select-row select {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: white;
+  color: #222;
 }

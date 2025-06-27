@@ -1,12 +1,12 @@
 import * as math from "mathjs";
-import { stateSpaceMatrices, aircraftProperties, steadyState1, coeffs as defaultCoeffs } from "./state_space";
+import { stateSpaceMatrices, aircraftProperties, steadyState1, steadyState2, coeffs as defaultCoeffs } from "./state_space";
 import * as SOLVER from "./solver";
 import Chart from "chart.js/auto";
 
 // === Constants ===
 const RAD2DEG = 180 / math.pi;
 const DEG2RAD = math.pi / 180;
-const dt = 0.01; // simulation step in seconds
+const dt = 0.001; // simulation step in seconds
 const chartUpdatePeriod = 0.02; // chart update interval in seconds
 const historyPeriod = 60; // seconds of history shown on chart
 const numStreamlines = 200;
@@ -31,8 +31,14 @@ pauseImg.src = "pause.png";
 // Clone defaults so we can modify them
 const coeffs = { ...defaultCoeffs };
 
+// Toggle check functions
+const showWind = () => document.getElementById("toggleWind").checked;
+const showBodyAxes = () => document.getElementById("toggleBodyAxes").checked;
+const showInertialAxes = () => document.getElementById("toggleInertialAxes").checked;
+
 // === System Setup ===
-let { A, B } = stateSpaceMatrices(aircraftProperties, steadyState1, coeffs);
+let ss = steadyState1;
+let { A, B } = stateSpaceMatrices(aircraftProperties, ss, coeffs);
 const x0 = [0, 0, 0, 0];
 let de = 0;
 let x = [...x0];
@@ -60,7 +66,10 @@ const chart = new Chart(ctx, {
       borderColor: 'black',
       borderWidth: 2,
       pointRadius: 0,
-      tension: 0.2
+      tension: 0.2,
+      pointRadius: 0,
+      pointHoverRadius: 6,
+      hitRadius: 10, 
     }]
   },
   options: {
@@ -81,6 +90,11 @@ const chart = new Chart(ctx, {
       }
     },
     plugins: {
+      tooltip: {
+        enabled: true,
+        mode: 'nearest',
+        intersect: false
+      },
       legend: { display: false }
     },
     maintainAspectRatio: false,
@@ -216,12 +230,18 @@ function drawAircraft() {
   ctx.clearRect(0, 0, aircraftCanvas.getBoundingClientRect().width, aircraftCanvas.getBoundingClientRect().height);
 
   // === Aircraft State ===
-  const [u, alpha, , theta] = x;
-  const u1 = steadyState1.TAS;
+  const [du, dalpha, , dtheta] = x;
+  const u1 = ss.TAS;
+  const aph1 = ss.alpha;
+  const tht1 = ss.theta;
+
+  const u = u1 + du;
+  const alpha = aph1 + dalpha;
+  const theta = tht1 + dtheta;
   const w = u1 * alpha; // consistent with EOM assumption
 
   // === Velocity Vectors ===
-  const Vt_body = { x: u1 + u, z: w };
+  const Vt_body = { x: u, z: w };
   const Vt_inertial = rotateVector(Vt_body, theta); // aircraft velocity in inertial frame
   const windVector = scaleVector(Vt_inertial, -1);   // relative wind = -Vt
   const windMag = magnitude(windVector);
@@ -231,26 +251,55 @@ function drawAircraft() {
     z: -Math.sin(theta),
   };
 
+  const bodyZ_inertial = {
+    x: Math.sin(theta),
+    z: Math.cos(theta),
+  };
+
   const centerX = aircraftCanvas.getBoundingClientRect().width / 2;
   const centerY = aircraftCanvas.getBoundingClientRect().height / 2;
-  const vectorLength = 200;
+  const vectorLength = 100;
+
+  const comOffset = rotateVector({x: 0.15 * aircraftImgWidth, z: 0.07 * aircraftImgHeight}, theta);
+  const elevatorOffset = rotateVector({x: 0.0 * aircraftImgWidth, z: 0.0 * aircraftImgHeight}, theta);
+
+  const originX = centerX + comOffset.x;
+  const originY = centerY + comOffset.z;
+
 
   // === Draw Scene ===
   drawStreamlines(ctx, windVector, metersToPixels);
   drawAircraftBody(ctx, centerX, centerY, theta);
-  drawArrow(ctx, 
-    centerX - (windVector.x / windMag) * vectorLength, 
-    centerY - (windVector.z / windMag) * vectorLength, 
-    centerX, centerY, 'blue'
-  );
-  drawArrow(ctx, 
-    centerX, centerY, 
-    centerX + bodyX_inertial.x * vectorLength, 
-    centerY + bodyX_inertial.z * vectorLength, 'green'
-  );
+  drawElevator(ctx, centerX + elevatorOffset.x, centerY + elevatorOffset.z, theta, de);
+
+
+  if (showWind()) {
+  drawArrow(ctx, originX, originY,
+            originX - windVector.x / windMag * vectorLength * 2, 
+            originY - windVector.z / windMag * vectorLength * 2, 'blue', true, "V_TAS");
+}
+
+
+  if (showBodyAxes()) {
+  drawArrow(ctx, originX, originY, 
+            originX + bodyX_inertial.x * vectorLength, originY + bodyX_inertial.z * vectorLength, 'red', true, "X_b");
+  drawArrow(ctx, originX, originY, 
+            originX + bodyZ_inertial.x * vectorLength, originY + bodyZ_inertial.z * vectorLength, 'green', true, "Z_b");
+  }
+
+  if (showInertialAxes()) {
+    drawInertialAxes(ctx);
+  }
+
 }
 
 // === Helpers ===
+
+function drawInertialAxes(ctx) {
+  const originX = 20, originY = 20, axisLen = 100;
+  drawArrow(ctx, originX, originY, originX + axisLen, originY, 'black', true, "X_i"); // X
+  drawArrow(ctx, originX, originY, originX, originY + axisLen, 'black', true, "Z_i"); // Z
+}
 
 function drawStreamlines(ctx, windVec, scale) {
   ctx.save();
@@ -265,8 +314,8 @@ function drawStreamlines(ctx, windVec, scale) {
   const dy = (wind_vy / norm) * len;
 
   for (let p of streamlineParticles) {
-    p.x += wind_vx * dt;
-    p.y += wind_vy * dt;
+    p.x += wind_vx * chartUpdatePeriod;
+    p.y += wind_vy * chartUpdatePeriod;
 
     if (p.x < -50) {
       p.x = aircraftCanvas.getBoundingClientRect().width + Math.random() * 300;
@@ -296,7 +345,28 @@ function drawAircraftBody(ctx, x, y, pitchRad) {
   ctx.restore();
 }
 
-function drawArrow(ctx, x1, y1, x2, y2, color = 'black') {
+function drawElevator(ctx, centerX, centerY, theta, de) {
+  const tailOffset = rotateVector({ x: -0.35 * aircraftImgWidth, z: 0.05 * aircraftImgHeight }, theta);
+  const tailX = centerX + tailOffset.x;
+  const tailY = centerY + tailOffset.z;
+
+  const length = 80;
+  const totalAngle = theta + de * 3;
+
+  const dx = length * Math.cos(totalAngle);
+  const dz = length * Math.sin(totalAngle);
+
+  ctx.save();
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(tailX, tailY);
+  ctx.lineTo(tailX - dx, tailY + dz);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, color = 'black', hasHead = true, label = "") {
   ctx.save();
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
@@ -304,7 +374,6 @@ function drawArrow(ctx, x1, y1, x2, y2, color = 'black') {
 
   const dx = x2 - x1;
   const dy = y2 - y1;
-  const len = Math.hypot(dx, dy);
   const headlen = 10;
   const angle = Math.atan2(dy, dx);
 
@@ -313,13 +382,29 @@ function drawArrow(ctx, x1, y1, x2, y2, color = 'black') {
   ctx.lineTo(x2, y2);
   ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-  ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
+  if (hasHead) {
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Optional label
+  if (label) {
+    ctx.font = 'bold 14px Courier New';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    const labelOffset = 6;
+    ctx.fillText(
+      label,
+      x2 + labelOffset * Math.cos(angle),
+      y2 + labelOffset * Math.sin(angle) + 10
+    );
+  }
 }
 
 // === Math Utilities ===
@@ -361,31 +446,43 @@ function updatePoles() {
 const coeffInputs = ["CD_a", "CL_a", "CL_q", "Cm_a", "Cm_adot", "Cm_q"];
 coeffInputs.forEach(id => {
   const input = document.getElementById(id);
-  const valDisplay = document.getElementById(id + "_val");
-  input.value = coeffs[id];
-  valDisplay.textContent = input.value;
+  const valInput = document.getElementById(id + "_val");
 
-  input.min = -20;
-  input.max = 20;
+  input.value = coeffs[id];
+  valInput.value = coeffs[id];
+
   input.step = 0.01;
 
+  // Slider → Textbox
   input.addEventListener("input", () => {
-    valDisplay.textContent = input.value;
-    coeffs[id] = parseFloat(input.value);
-    ({ A, B } = stateSpaceMatrices(aircraftProperties, steadyState1, coeffs));
+    const value = parseFloat(input.value);
+    valInput.value = value.toFixed(2);
+    coeffs[id] = value;
+    ({ A, B } = stateSpaceMatrices(aircraftProperties, ss, coeffs));
     updatePoles();
+  });
+
+  // Textbox → Slider
+  valInput.addEventListener("input", () => {
+    const value = parseFloat(valInput.value);
+    if (!isNaN(value)) {
+      coeffs[id] = value;
+      input.value = value;
+      ({ A, B } = stateSpaceMatrices(aircraftProperties, ss, coeffs));
+      updatePoles();
+    }
   });
 });
 
 resetCoeffsButton.onclick = () => {
   coeffInputs.forEach(id => {
     coeffs[id] = defaultCoeffs[id];
-    const input = document.getElementById(id);
-    const valDisplay = document.getElementById(id + "_val");
-    input.value = coeffs[id];
-    valDisplay.textContent = coeffs[id];
+    const slider = document.getElementById(id);
+    const numberInput = document.getElementById(id + "_val");
+    slider.value = coeffs[id];
+    numberInput.value = coeffs[id];
   });
-  ({ A, B } = stateSpaceMatrices(aircraftProperties, steadyState1, coeffs));
+  ({ A, B } = stateSpaceMatrices(aircraftProperties, ss, coeffs));
   updatePoles();
 };
 
@@ -414,15 +511,16 @@ function handleResetButtonPress() {
     p.x = Math.random() * aircraftCanvas.width;
     p.y = (Math.random() * 2 - 1) * aircraftCanvas.height * 2;
   }
+  de = ss.de;
 }
 
 function deflectElevator(e) {
   e.preventDefault(); 
-  de = - 2 * DEG2RAD; 
+  de = ss.de - 2 * DEG2RAD; 
 }
 function resetElevator(e) { 
   e.preventDefault();
-  de = 0; 
+  de = 0;
 }
 
 playButton.onclick = handlePlayButtonPress;
@@ -446,14 +544,27 @@ tabButtons.forEach(button => {
 });
 
 function updateSteadyStateInfo() {
-  document.getElementById('altitude').textContent = steadyState1.altitude.toFixed(0);
-  document.getElementById('TAS').textContent = steadyState1.TAS.toFixed(2);
-  document.getElementById('alpha').textContent = (steadyState1.alpha * RAD2DEG).toFixed(2);
-  document.getElementById('CL').textContent = steadyState1.CL_1.toFixed(3);
-  document.getElementById('CD').textContent = steadyState1.CD_1.toFixed(3);
-  document.getElementById('theta').textContent = (steadyState1.theta * RAD2DEG).toFixed(2);
-  document.getElementById('de').textContent = (steadyState1.de * RAD2DEG).toFixed(2);
+  document.getElementById('altitude').textContent = ss.altitude.toFixed(0);
+  document.getElementById('TAS').textContent = ss.TAS.toFixed(2);
+  document.getElementById('alpha').textContent = (ss.alpha * RAD2DEG).toFixed(2);
+  document.getElementById('CL').textContent = ss.CL_1.toFixed(3);
+  document.getElementById('CD').textContent = ss.CD_1.toFixed(3);
+  document.getElementById('theta').textContent = (ss.theta * RAD2DEG).toFixed(2);
+  document.getElementById('de').textContent = (ss.de * RAD2DEG).toFixed(2);
 }
+
+document.getElementById("steadyStateSelect").addEventListener("change", (e) => {
+  const selected = e.target.value;
+  ss = selected === "1" ? steadyState1 : steadyState2;
+
+  // Rebuild A and B with new steady state
+  ({ A, B } = stateSpaceMatrices(aircraftProperties, ss, coeffs));
+
+  // Reset simulation state
+  handleResetButtonPress();
+  updatePoles();
+  updateSteadyStateInfo();
+});
 
 function resizeCanvasToDisplaySize(canvas) {
   const rect = canvas.getBoundingClientRect(); // ← CSS pixel size

@@ -29,8 +29,22 @@ export const steadyState1 = {
     CL_1: 0.307,
     CD_1: 0.032,
     theta: 0,
+    de: 0,
+};
+
+
+// Approach steady state condition
+export const steadyState2 = {
+    altitude: 0,
+    TAS: 32.6,
+    alpha: 0.0698132,
+    CL_1: 1.120,
+    CD_1: 0.132,
+    theta: 0,
     de: 0
 };
+
+
 
 export const coeffs = {
     CD_a: 0.121,
@@ -118,7 +132,7 @@ function stateSpaceFromDimensional(steadyState, dimDerivs){
 
     const u1 = steadyState.TAS;
     const aph1 = steadyState.alpha;
-    const w1 = u1 * tan(aph1);
+    const w1 = u1 * aph1;
     const tht1 = steadyState.theta;
 
     // Gravity
