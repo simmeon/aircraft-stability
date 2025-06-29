@@ -95,7 +95,10 @@ const chart = new Chart(ctx, {
         mode: 'nearest',
         intersect: false
       },
-      legend: { display: false }
+      legend: { display: false },
+      decimation: {
+        enabled: true
+      }
     },
     maintainAspectRatio: false,
     responsive: true,
