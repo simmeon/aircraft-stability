@@ -6,7 +6,7 @@ import Chart from "chart.js/auto";
 // === Constants ===
 const RAD2DEG = 180 / math.pi;
 const DEG2RAD = math.pi / 180;
-const dt = 0.001; // simulation step in seconds
+const dt = 0.004; // simulation step in seconds
 const chartUpdatePeriod = 0.02; // chart update interval in seconds
 const historyPeriod = 60; // seconds of history shown on chart
 const numStreamlines = 200;
