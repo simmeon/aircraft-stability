@@ -32,15 +32,25 @@ export const steadyState1 = {
     de: 0,
 };
 
+// Climb steady state condition
+export const steadyState2 = {
+    altitude: 0,
+    TAS: 40.7,
+    alpha: 0.0942478,
+    CL_1: 0.719,
+    CD_1: 0.057,
+    theta: 0.0942478,
+    de: 0
+};
 
 // Approach steady state condition
-export const steadyState2 = {
+export const steadyState3 = {
     altitude: 0,
     TAS: 32.6,
     alpha: 0.0698132,
     CL_1: 1.120,
     CD_1: 0.132,
-    theta: 0,
+    theta: 0.0698132,
     de: 0
 };
 
@@ -141,8 +151,8 @@ function stateSpaceFromDimensional(steadyState, dimDerivs){
     // Matrices
     const A = [
         [Xu, Xa, - w1, - g * cos(tht1)], 
-        [Zu, Za, 1 + Zq, - g * sin(tht1)], 
-        [Zu * Madot, Ma + Za * Madot, Mq + (1 + Zq) * Madot, - g * sin(tht1) * Madot], 
+        [Zu, Za, 1 + Zq, - g * sin(tht1) / u1], 
+        [Zu * Madot, Ma + Za * Madot, Mq + (1 + Zq) * Madot, - g * sin(tht1) / u1 * Madot], 
         [0, 0, 1, 0]
     ];
 

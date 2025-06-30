@@ -1,5 +1,5 @@
 import * as math from "mathjs";
-import { stateSpaceMatrices, aircraftProperties, steadyState1, steadyState2, coeffs as defaultCoeffs } from "./state_space";
+import { stateSpaceMatrices, aircraftProperties, steadyState1, steadyState2, steadyState3, coeffs as defaultCoeffs } from "./state_space";
 import * as SOLVER from "./solver";
 import Chart from "chart.js/auto";
 
@@ -558,8 +558,13 @@ function updateSteadyStateInfo() {
 
 document.getElementById("steadyStateSelect").addEventListener("change", (e) => {
   const selected = e.target.value;
-  ss = selected === "1" ? steadyState1 : steadyState2;
-
+  if (selected === "1") {
+    ss = steadyState1;
+  } else if (selected === "2") {
+    ss = steadyState2;
+  } else {
+    ss = steadyState3;
+  }
   // Rebuild A and B with new steady state
   ({ A, B } = stateSpaceMatrices(aircraftProperties, ss, coeffs));
 
