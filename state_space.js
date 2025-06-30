@@ -4,10 +4,10 @@ Aircraft longitudinal linear state space equations of motion.
 Creates and returns the A and B matrices in equations of the form xdot = Ax + Bu.
 
 Author: simmeon
-Last Modified: 2025-06-20
+Last Modified: 2025-06-30
 */
 
-import {sin, cos, tan} from "mathjs";
+import {sin, cos} from "mathjs";
 
 import { USStandardAtmosphere1976 } from "./ussa";
 
