@@ -446,7 +446,7 @@ function updatePoles() {
   poleChart.update();
 }
 
-const coeffInputs = ["CD_a", "CL_a", "CL_q", "Cm_a", "Cm_adot", "Cm_q"];
+const coeffInputs = ["CD_a", "CTX_u", "CL_a", "CL_q", "Cm_a", "Cm_adot", "Cm_q"];
 coeffInputs.forEach(id => {
   const input = document.getElementById(id);
   const valInput = document.getElementById(id + "_val");

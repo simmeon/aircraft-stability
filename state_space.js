@@ -58,6 +58,7 @@ export const steadyState3 = {
 
 export const coeffs = {
     CD_a: 0.121,
+    CTX_u: -0.096,
     CL_a: 4.41,
     CL_q: 3.9,
     Cm_a: -0.613,
@@ -78,8 +79,10 @@ function dimensionalDerivatives(aircraftProperties, steadyState, coeffs) {
     const u1 = steadyState.TAS;
     const CL_1 =  steadyState.CL_1;
     const CD_1 =  steadyState.CD_1;
+    const CTX_1 = CD_1;
 
     const CD_a = coeffs.CD_a;
+    const CTX_u = coeffs.CTX_u;
     const CL_a = coeffs.CL_a;
     const CL_q = coeffs.CL_q;
     const Cm_a = coeffs.Cm_a;
@@ -101,6 +104,7 @@ function dimensionalDerivatives(aircraftProperties, steadyState, coeffs) {
 
     // Dimensional derivatives
     const Xu = - qS / mu * 2 * CD_1;
+    const XTu = qS / mu * (CTX_u + 2 * CTX_1);
     const Xa = qS / m * (- CD_a + CL_1);
 
     const Zu = - qS / (mu * u1) * 2 * CL_1;
@@ -115,6 +119,7 @@ function dimensionalDerivatives(aircraftProperties, steadyState, coeffs) {
 
     return {
         Xu: Xu,
+        XTu: XTu,
         Xa: Xa,
         Zu: Zu,
         Za: Za,
@@ -130,6 +135,7 @@ function dimensionalDerivatives(aircraftProperties, steadyState, coeffs) {
 function stateSpaceFromDimensional(steadyState, dimDerivs){
     // Aliases
     const Xu = dimDerivs.Xu;
+    const XTu = dimDerivs.XTu;
     const Xa = dimDerivs.Xa;
     const Zu = dimDerivs.Zu;
     const Za = dimDerivs.Za;
@@ -150,7 +156,7 @@ function stateSpaceFromDimensional(steadyState, dimDerivs){
 
     // Matrices
     const A = [
-        [Xu, Xa, - w1, - g * cos(tht1)], 
+        [Xu + XTu, Xa, - w1, - g * cos(tht1)], 
         [Zu, Za, 1 + Zq, - g * sin(tht1) / u1], 
         [Zu * Madot, Ma + Za * Madot, Mq + (1 + Zq) * Madot, - g * sin(tht1) / u1 * Madot], 
         [0, 0, 1, 0]

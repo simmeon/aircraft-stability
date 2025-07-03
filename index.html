@@ -40,7 +40,7 @@
 
       <div class="info-panels row">
         <div id="steadyStateInfo" class="panel half">
-          <h3>Steady State Condition</h3>
+          <h3>Steady State Reference Condition</h3>
           <div class="steady-state-select-row">
             <select id="steadyStateSelect">
               <option value="1">Steady State 1</option>
@@ -70,6 +70,12 @@
             <label for="CD_a">\(C_{D_{\alpha}}\):</label>
             <input type="range" id="CD_a" min="-5" max="5" step="0.01" value="0.121">
             <input type="number" id="CD_a_val" class="value-box" step="0.01">
+          </div>
+
+          <div class="slider-row">
+            <label for="CTX_u">\(C_{T_{X_{u}}}\):</label>
+            <input type="range" id="CTX_u" min="-1" max="1" step="0.01" value="-0.096">
+            <input type="number" id="CTX_u_val" class="value-box" step="0.01">
           </div>
 
           <div class="slider-row">

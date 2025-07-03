@@ -217,7 +217,7 @@ body {
   flex: 1;
   box-shadow: 0 0 6px rgba(0,0,0,0.1);
   overflow-y: auto;
-  max-height: 300px;
+  max-height: 350px;
 }
 
 .panel.half {
@@ -495,3 +495,12 @@ button:disabled {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
+
+.info-panels.row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  flex: 1; /* Let this row grow to fill remaining space */
+  min-height: 0; /* Ensure it can shrink too if needed */
+}
+
