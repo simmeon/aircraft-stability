@@ -53,6 +53,9 @@ Christopher Lum has some great videos on flight dynamics, in particular on deriv
 ### Videos - Steve Brunton
 Steve Brunton has a huge amount of knowledge and explanatory videos with a focus on control. I would recommend his [Control Bootcamp](https://www.youtube.com/playlist?list=PLMrJAkhIeNNR20Mz-VpzgfQs5zrYi085m) to help you if it's been a while since you've done control. He also has plenty of other maths and control videos if jumping straight into that is a bit much.
 
+### Videos - Brian Douglas
+Brian Douglas has a lot of really good videos covering a wide range of control theory. These are a great way to understand the bigger picture ideas and reasoning without getting lost in the complex mathematics that is often involved in control. He has videos on [his own channel](https://www.youtube.com/@BrianBDouglas) and lots more on the MATLAB channel as MATLAB tech talks, such as this series on [state spaces](https://www.youtube.com/playlist?list=PLn8PRpmsu08podBgFw66-IavqU2SqPg_w).
+
 ### Honorable Mentions
 At this point it feels like there are countless textbooks and references I've used for flight mechanics and control. A few more that seem to come up often for me are:
 
